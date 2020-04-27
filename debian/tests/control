@@ -1,7 +1,11 @@
 Tests: build
-Depends: libsdl2-dev, build-essential
-Restrictions: allow-stderr
+Depends: build-essential, libsdl2-dev
+Restrictions: superficial, allow-stderr
 
-Tests: build-all
-Depends: @builddeps@, libsdl2-dev, cmake, build-essential
-Restrictions: allow-stderr
+Tests: cmake
+Depends: build-essential, cmake, libsdl2-dev
+Restrictions: superficial, allow-stderr
+
+Tests: deprecated-use
+Depends: build-essential, libsdl2-dev, libsdl2-ttf-dev
+Restrictions: superficial, allow-stderr

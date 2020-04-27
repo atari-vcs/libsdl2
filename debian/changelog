@@ -1,3 +1,111 @@
+libsdl2 (2.0.12+dfsg1-1~exp1) experimental; urgency=medium
+
+  * Team upload
+
+  [ Simon McVittie ]
+  * New upstream release (Closes: #954660)
+    - d/copyright: Update
+    - d/copyright, d/gbp.conf: Exclude compiled shaders for macOS etc.
+    - d/copyright, d/gbp.conf: Exclude non-free Steam Controller headers
+      (these have been relicensed in the hg repository, so the exclusion
+      can probably be dropped with 2.0.14, but as far as I can see they're
+      only used on non-Linux platforms anyway)
+  * Remove SHLIBVER, rely on debhelper compat 12 defaults
+
+  [ Gianfranco Costamagna ]
+  * Update copyright years
+  * Drop CVE-2019-13616: upstream
+  * Refresh no-libdir patch
+  * Also install the sdl2-config-version.cmake file
+  * Remove old dbgsym migration command
+  * Remove signatures from signing key
+  * Bump std-version to 4.5.0
+  * Add Rules-Requires-Root: no
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 27 Apr 2020 14:19:49 +0100
+
+libsdl2 (2.0.10+dfsg1-3) unstable; urgency=medium
+
+  * Team upload
+
+  [ Gianfranco Costamagna ]
+  * Fix autopkgtests for cross-architecture testing, by making sure
+    sdl2-config calls the correct pkg-config command
+
+  [ Simon McVittie ]
+  * Revert "Add the non-multiarch include dir to pkg-config cflags for
+    compatibility."
+  * Revert "Install all headers in an architecture-specific location"
+  * Make SDL_config.h redirect to an architecture-specific version
+    (Closes: #909740, #951087, #951943, #951959, #951974, #951976, #952049,
+    #951962, #952105, #955416)
+  * Create a SDL_platform.h symlink in /usr/include/MULTIARCH/SDL2
+    (Closes: #952046, #952066, #952098)
+  * Add autopkgtests for various deprecated use patterns
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 13 Apr 2020 18:27:11 +0100
+
+libsdl2 (2.0.10+dfsg1-2) unstable; urgency=medium
+
+  [ Simon McVittie ]
+  * d/tests: Add a test that detecting SDL2 via CMake does not regress.
+    This is the sort of thing that could easily regress while solving #909740.
+  * Install all headers in an architecture-specific location.
+    This approach was suggested by Adrian Bunk on #909740, as one of several
+    possible ways to avoid SDL_config.h colliding between architectures.
+    Because this approach uses a different @includedir@ for each architecture,
+    we can no longer have @includedir@ in sdl2-config.in: that would result
+    in non-co-installability. However, simply removing it (similar to
+    no-libdir.patch) is not an option, because the SDL 2 headers are not
+    on the default include path (and they cannot be added to it without
+    breaking parallel-installability of SDL 1.2 or a hypothetical future
+    SDL 3). Instead, patch sdl-config.in to ask pkg-config for its CFLAGS
+    and LIBS. This can supersede the previous no-libdir.patch.
+    This relies on the assumption that cross-compilation will always set
+    PKG_CONFIG, even if that environment variable is not otherwise used by
+    the build system that is invoking sdl2-config.
+    The sdl2-config.cmake.in part of no-libdir.patch can simply be dropped,
+    because that file is installed to an architecture-specific location
+    anyway, namely ${libdir}/cmake.
+  * Mark libsdl2-dev as Multi-Arch: same (Closes: #909740)
+
+  [ Gianfranco Costamagna ]
+  * Upload part of Ubuntu delta to Debian
+
+  [ Timo Aaltonen ]
+  * rules: Disable GLES1, it's getting enabled because libgles-dev ships
+    GLES1 headers now, but they have conflicting types against the ones
+    SDL has.
+
+  [ Steve Langasek ]
+  * Make autopkgtests cross-test-friendly. (Closes: #946496)
+
+  [ Felix Geyer ]
+  * Drop build-all autopkgtest.
+    - We already have tests that check if building against SDL2 with pkg-config,
+      sdl2-config and cmake works correctly.
+    - It has a large overhead as it rebuilds SDL2 and requires supporting
+      cmake as a second buildsystem.
+  * Add the non-multiarch include dir to pkg-config cflags for compatibility.
+
+ -- Felix Geyer <fgeyer@debian.org>  Sun, 02 Feb 2020 23:02:25 +0100
+
+libsdl2 (2.0.10+dfsg1-1) unstable; urgency=medium
+
+  * New upstream release. (Closes: #939249)
+    - Fixes warnings with -Wundef on non-x86 hosts. (Closes: #892087)
+    - Fixes CVE-2019-7572, CVE-2019-7573, CVE-2019-7574, CVE-2019-7575,
+      CVE-2019-7576, CVE-2019-7577, CVE-2019-7578, CVE-2019-7635,
+      CVE-2019-7636, CVE-2019-7638 and CVE-2019-13626 (Closes: #924610)
+  * Drop fix-cross-building-907711.patch, fixed upstream.
+  * Bump SHLIBVER to 2.0.10.
+  * Add support for nodoc build-profile.
+  * Switch to debhelper compat level 12.
+  * Cherry-pick upstream fix for CVE-2019-13616.
+  * Mark autopkgtests as superficial.
+
+ -- Felix Geyer <fgeyer@debian.org>  Thu, 19 Sep 2019 23:50:39 +0200
+
 libsdl2 (2.0.9+dfsg1-1) unstable; urgency=medium
 
   * New upstream release. (Closes: #914251)
