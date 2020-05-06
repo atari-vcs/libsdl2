@@ -10,7 +10,6 @@ Uploaders:
 Standards-Version: 4.5.1
 Build-Depends:
  debhelper-compat (= 12),
- fcitx-libs-dev,
  libasound2-dev [linux-any],
  libdbus-1-dev,
  libdrm-dev [linux-any],
