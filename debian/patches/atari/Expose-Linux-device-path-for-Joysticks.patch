@@ -1,0 +1,114 @@
+From: Sjoerd Simons <sjoerd@collabora.com>
+Date: Wed, 6 May 2020 09:23:00 +0200
+Subject: Expose Linux device path for Joysticks
+
+It's currently impossible to correlate an SDL Joystick to a device on
+Linux. Add a linux-only function to get the device path used for a given
+Joystick which uniquely identifies the device. This allows a more system
+type HMI to work out information about the joystick not support by SDL
+(e.g. usb port it's connected to, firmware version, bt mac address).
+
+This patch puts the new API in a atari vcs specific symbol namespace to
+avoid conflicts in future (if upstream api's end up different)
+
+Signed-off-by: Sjoerd Simons <sjoerd@collabora.com>
+---
+ include/SDL_joystick.h               |  9 +++++++++
+ src/dynapi/SDL_dynapi_overrides.h    |  1 +
+ src/dynapi/SDL_dynapi_procs.h        |  3 +++
+ src/joystick/SDL_joystick.c          |  6 ++++++
+ src/joystick/SDL_sysjoystick.h       |  4 ++++
+ src/joystick/linux/SDL_sysjoystick.c | 10 ++++++++++
+ 6 files changed, 33 insertions(+)
+
+diff --git a/include/SDL_joystick.h b/include/SDL_joystick.h
+index a0dd720..6a02a45 100644
+--- a/include/SDL_joystick.h
++++ b/include/SDL_joystick.h
+@@ -407,6 +407,15 @@ extern DECLSPEC void SDLCALL SDL_JoystickClose(SDL_Joystick * joystick);
+  */
+ extern DECLSPEC SDL_JoystickPowerLevel SDLCALL SDL_JoystickCurrentPowerLevel(SDL_Joystick * joystick);
+ 
++#ifdef __LINUX__
++/**
++ *  Return the device path this currently opened joystick.
++ *  If no path can be found, this function returns NULL.
++ */
++extern DECLSPEC const char *SDLCALL VCS_SDL_JoystickLinuxDevicePath(SDL_Joystick * joystick);
++
++#endif
++
+ /* Ends C function definitions when using C++ */
+ #ifdef __cplusplus
+ }
+diff --git a/src/dynapi/SDL_dynapi_overrides.h b/src/dynapi/SDL_dynapi_overrides.h
+index a5b4d6a..fbaf6a6 100644
+--- a/src/dynapi/SDL_dynapi_overrides.h
++++ b/src/dynapi/SDL_dynapi_overrides.h
+@@ -749,3 +749,4 @@
+ #define SDL_GetAndroidSDKVersion SDL_GetAndroidSDKVersion_REAL
+ #define SDL_isupper SDL_isupper_REAL
+ #define SDL_islower SDL_islower_REAL
++#define VCS_SDL_JoystickLinuxDevicePath VCS_SDL_JoystickLinuxDevicePath_REAL
+diff --git a/src/dynapi/SDL_dynapi_procs.h b/src/dynapi/SDL_dynapi_procs.h
+index 404a5e7..e8b4611 100644
+--- a/src/dynapi/SDL_dynapi_procs.h
++++ b/src/dynapi/SDL_dynapi_procs.h
+@@ -809,3 +809,6 @@ SDL_DYNAPI_PROC(int,SDL_GetAndroidSDKVersion,(void),(),return)
+ #endif
+ SDL_DYNAPI_PROC(int,SDL_isupper,(int a),(a),return)
+ SDL_DYNAPI_PROC(int,SDL_islower,(int a),(a),return)
++#ifdef __LINUX__
++SDL_DYNAPI_PROC(const char*,VCS_SDL_JoystickLinuxDevicePath,(SDL_Joystick *a),(a),return)
++#endif
+diff --git a/src/joystick/SDL_joystick.c b/src/joystick/SDL_joystick.c
+index 95aac9c..5025755 100644
+--- a/src/joystick/SDL_joystick.c
++++ b/src/joystick/SDL_joystick.c
+@@ -2046,4 +2046,10 @@ SDL_JoystickPowerLevel SDL_JoystickCurrentPowerLevel(SDL_Joystick * joystick)
+     return joystick->epowerlevel;
+ }
+ 
++#ifdef __LINUX__
++const char *VCS_SDL_JoystickLinuxDevicePath(SDL_Joystick * joystick)
++{
++  return LINUX_Joystick_get_devpath (joystick);
++}
++#endif
+ /* vi: set ts=4 sw=4 expandtab: */
+diff --git a/src/joystick/SDL_sysjoystick.h b/src/joystick/SDL_sysjoystick.h
+index 6eb8bf4..4f0543b 100644
+--- a/src/joystick/SDL_sysjoystick.h
++++ b/src/joystick/SDL_sysjoystick.h
+@@ -154,6 +154,10 @@ extern SDL_JoystickDriver SDL_IOS_JoystickDriver;
+ extern SDL_JoystickDriver SDL_LINUX_JoystickDriver;
+ extern SDL_JoystickDriver SDL_WINDOWS_JoystickDriver;
+ 
++#ifdef __LINUX__
++extern const char * LINUX_Joystick_get_devpath (SDL_Joystick *joystick);
++#endif
++
+ #endif /* SDL_sysjoystick_h_ */
+ 
+ /* vi: set ts=4 sw=4 expandtab: */
+diff --git a/src/joystick/linux/SDL_sysjoystick.c b/src/joystick/linux/SDL_sysjoystick.c
+index fcfc0f3..df23a1e 100644
+--- a/src/joystick/linux/SDL_sysjoystick.c
++++ b/src/joystick/linux/SDL_sysjoystick.c
+@@ -1107,6 +1107,16 @@ LINUX_JoystickQuit(void)
+     SDL_QuitSteamControllers();
+ }
+ 
++const char *
++LINUX_Joystick_get_devpath (SDL_Joystick *joystick)
++{
++    if (joystick->driver == &SDL_LINUX_JoystickDriver && joystick->hwdata) {
++        return joystick->hwdata->fname;
++    }
++
++    return NULL;
++}
++
+ SDL_JoystickDriver SDL_LINUX_JoystickDriver =
+ {
+     LINUX_JoystickInit,

@@ -4,3 +4,4 @@ Add-a-make-install-target-for-the-tests.patch
 no-libdir.patch
 audio-Support-pulse-as-an-alias-for-pulseaudio.patch
 test-Fix-path-used-in-AC_CONFIG_AUX_DIR.patch
+atari/Expose-Linux-device-path-for-Joysticks.patch
