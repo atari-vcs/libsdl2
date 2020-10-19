@@ -1,3 +1,10 @@
+libsdl2 (2.0.12+dfsg1-1~exp1ata3) vcs; urgency=medium
+
+  * d/p/atari/Add-mappings-for-atari-vcs-controllers.patch
+    + Fixed; Move mapping into linux area
+
+ -- Sjoerd Simons <sjoerd@collabora.com>  Mon, 19 Oct 2020 16:40:15 +0200
+
 libsdl2 (2.0.12+dfsg1-1~exp1ata2) vcs; urgency=medium
 
   * d/p/atari/Add-mappings-for-atari-vcs-controllers.patch
