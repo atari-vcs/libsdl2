@@ -1,3 +1,10 @@
+libsdl2 (2.0.12+dfsg1-1~exp1ata2) vcs; urgency=medium
+
+  * d/p/atari/Add-mappings-for-atari-vcs-controllers.patch
+    + Added; Add gamepad mappings for the atari devices
+
+ -- Sjoerd Simons <sjoerd@collabora.com>  Mon, 19 Oct 2020 15:44:52 +0200
+
 libsdl2 (2.0.12+dfsg1-1~exp1ata1) vcs; urgency=medium
 
   * Don't build with fcitx support to avoid dependencies
