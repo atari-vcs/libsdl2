@@ -1,3 +1,10 @@
+libsdl2 (2.0.12+dfsg1-1~exp1ata4) vcs; urgency=medium
+
+  * d/p/atari/Ignore-the-device-version-for-atari-devices.patch
+    + Added. Ignore version of the atari device for the gamepad mappings
+
+ -- Sjoerd Simons <sjoerd@collabora.com>  Wed, 28 Apr 2021 20:07:06 +0200
+
 libsdl2 (2.0.12+dfsg1-1~exp1ata3) vcs; urgency=medium
 
   * d/p/atari/Add-mappings-for-atari-vcs-controllers.patch
