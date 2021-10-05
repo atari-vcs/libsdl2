@@ -16,18 +16,18 @@ Signed-off-by: Sjoerd Simons <sjoerd@collabora.com>
  include/SDL_joystick.h               |  9 +++++++++
  src/dynapi/SDL_dynapi_overrides.h    |  1 +
  src/dynapi/SDL_dynapi_procs.h        |  3 +++
- src/joystick/SDL_joystick.c          |  6 ++++++
+ src/joystick/SDL_joystick.c          |  7 +++++++
  src/joystick/SDL_sysjoystick.h       |  4 ++++
  src/joystick/linux/SDL_sysjoystick.c | 10 ++++++++++
- 6 files changed, 33 insertions(+)
+ 6 files changed, 34 insertions(+)
 
 diff --git a/include/SDL_joystick.h b/include/SDL_joystick.h
-index a0dd720..6a02a45 100644
+index 8be4b73..0e4a9d2 100644
 --- a/include/SDL_joystick.h
 +++ b/include/SDL_joystick.h
-@@ -407,6 +407,15 @@ extern DECLSPEC void SDLCALL SDL_JoystickClose(SDL_Joystick * joystick);
+@@ -810,6 +810,15 @@ extern DECLSPEC void SDLCALL SDL_JoystickClose(SDL_Joystick *joystick);
   */
- extern DECLSPEC SDL_JoystickPowerLevel SDLCALL SDL_JoystickCurrentPowerLevel(SDL_Joystick * joystick);
+ extern DECLSPEC SDL_JoystickPowerLevel SDLCALL SDL_JoystickCurrentPowerLevel(SDL_Joystick *joystick);
  
 +#ifdef __LINUX__
 +/**
@@ -42,30 +42,36 @@ index a0dd720..6a02a45 100644
  #ifdef __cplusplus
  }
 diff --git a/src/dynapi/SDL_dynapi_overrides.h b/src/dynapi/SDL_dynapi_overrides.h
-index a5b4d6a..fbaf6a6 100644
+index 1e7d8bb..9268f78 100644
 --- a/src/dynapi/SDL_dynapi_overrides.h
 +++ b/src/dynapi/SDL_dynapi_overrides.h
-@@ -749,3 +749,4 @@
+@@ -749,6 +749,7 @@
  #define SDL_GetAndroidSDKVersion SDL_GetAndroidSDKVersion_REAL
  #define SDL_isupper SDL_isupper_REAL
  #define SDL_islower SDL_islower_REAL
 +#define VCS_SDL_JoystickLinuxDevicePath VCS_SDL_JoystickLinuxDevicePath_REAL
+ #define SDL_JoystickAttachVirtual SDL_JoystickAttachVirtual_REAL
+ #define SDL_JoystickDetachVirtual SDL_JoystickDetachVirtual_REAL
+ #define SDL_JoystickIsVirtual SDL_JoystickIsVirtual_REAL
 diff --git a/src/dynapi/SDL_dynapi_procs.h b/src/dynapi/SDL_dynapi_procs.h
-index 404a5e7..e8b4611 100644
+index 9fe7649..dde2a0c 100644
 --- a/src/dynapi/SDL_dynapi_procs.h
 +++ b/src/dynapi/SDL_dynapi_procs.h
-@@ -809,3 +809,6 @@ SDL_DYNAPI_PROC(int,SDL_GetAndroidSDKVersion,(void),(),return)
+@@ -809,6 +809,9 @@ SDL_DYNAPI_PROC(int,SDL_GetAndroidSDKVersion,(void),(),return)
  #endif
  SDL_DYNAPI_PROC(int,SDL_isupper,(int a),(a),return)
  SDL_DYNAPI_PROC(int,SDL_islower,(int a),(a),return)
 +#ifdef __LINUX__
 +SDL_DYNAPI_PROC(const char*,VCS_SDL_JoystickLinuxDevicePath,(SDL_Joystick *a),(a),return)
 +#endif
+ SDL_DYNAPI_PROC(int,SDL_JoystickAttachVirtual,(SDL_JoystickType a, int b, int c, int d),(a,b,c,d),return)
+ SDL_DYNAPI_PROC(int,SDL_JoystickDetachVirtual,(int a),(a),return)
+ SDL_DYNAPI_PROC(SDL_bool,SDL_JoystickIsVirtual,(int a),(a),return)
 diff --git a/src/joystick/SDL_joystick.c b/src/joystick/SDL_joystick.c
-index 95aac9c..5025755 100644
+index 1bab305..ac1496f 100644
 --- a/src/joystick/SDL_joystick.c
 +++ b/src/joystick/SDL_joystick.c
-@@ -2046,4 +2046,10 @@ SDL_JoystickPowerLevel SDL_JoystickCurrentPowerLevel(SDL_Joystick * joystick)
+@@ -2652,6 +2652,13 @@ SDL_JoystickPowerLevel SDL_JoystickCurrentPowerLevel(SDL_Joystick *joystick)
      return joystick->epowerlevel;
  }
  
@@ -75,14 +81,17 @@ index 95aac9c..5025755 100644
 +  return LINUX_Joystick_get_devpath (joystick);
 +}
 +#endif
- /* vi: set ts=4 sw=4 expandtab: */
++
+ int SDL_PrivateJoystickTouchpad(SDL_Joystick *joystick, int touchpad, int finger, Uint8 state, float x, float y, float pressure)
+ {
+     SDL_JoystickTouchpadInfo *touchpad_info;
 diff --git a/src/joystick/SDL_sysjoystick.h b/src/joystick/SDL_sysjoystick.h
-index 6eb8bf4..4f0543b 100644
+index 91c9a7c..cbf6a0f 100644
 --- a/src/joystick/SDL_sysjoystick.h
 +++ b/src/joystick/SDL_sysjoystick.h
-@@ -154,6 +154,10 @@ extern SDL_JoystickDriver SDL_IOS_JoystickDriver;
- extern SDL_JoystickDriver SDL_LINUX_JoystickDriver;
- extern SDL_JoystickDriver SDL_WINDOWS_JoystickDriver;
+@@ -215,6 +215,10 @@ extern SDL_JoystickDriver SDL_OS2_JoystickDriver;
+ extern SDL_JoystickDriver SDL_PSP_JoystickDriver;
+ extern SDL_JoystickDriver SDL_VITA_JoystickDriver;
  
 +#ifdef __LINUX__
 +extern const char * LINUX_Joystick_get_devpath (SDL_Joystick *joystick);
@@ -92,10 +101,10 @@ index 6eb8bf4..4f0543b 100644
  
  /* vi: set ts=4 sw=4 expandtab: */
 diff --git a/src/joystick/linux/SDL_sysjoystick.c b/src/joystick/linux/SDL_sysjoystick.c
-index fcfc0f3..df23a1e 100644
+index eeaf6c8..d2ed791 100644
 --- a/src/joystick/linux/SDL_sysjoystick.c
 +++ b/src/joystick/linux/SDL_sysjoystick.c
-@@ -1107,6 +1107,16 @@ LINUX_JoystickQuit(void)
+@@ -1424,6 +1424,16 @@ LINUX_JoystickQuit(void)
      SDL_QuitSteamControllers();
  }
  
@@ -109,6 +118,6 @@ index fcfc0f3..df23a1e 100644
 +    return NULL;
 +}
 +
- SDL_JoystickDriver SDL_LINUX_JoystickDriver =
- {
-     LINUX_JoystickInit,
+ /*
+    This is based on the Linux Gamepad Specification
+    available at: https://www.kernel.org/doc/html/v4.15/input/gamepad.html
