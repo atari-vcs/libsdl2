@@ -1,3 +1,22 @@
+libsdl2 (2.0.16+dfsg1-4+apertis0atari1) atari; urgency=medium
+
+  [ Christopher Obbard ]
+  * Disable build tests as they require newer cmake
+
+  [ Sjoerd Simons ]
+  * Build without fcitx
+  * d/p/atari/Expose-Linux-device-path-for-Joysticks.patch
+    - Add atari vcs specific api to get joystick device from SDL;
+      upstream issue: https://bugzilla.libsdl.org/show_bug.cgi?id=5125
+
+ -- Christopher Obbard <chris.obbard@collabora.com>  Tue, 05 Oct 2021 16:48:20 +0100
+
+libsdl2 (2.0.16+dfsg1-4+apertis0) atari; urgency=medium
+
+  * Sync from debian/sid.
+
+ -- Apertis CI <devel@lists.apertis.org>  Tue, 05 Oct 2021 16:44:26 +0100
+
 libsdl2 (2.0.16+dfsg1-4) unstable; urgency=medium
 
   * d/p/audio-Support-pulse-as-an-alias-for-pulseaudio.patch:
